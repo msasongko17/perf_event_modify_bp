@@ -40,9 +40,10 @@ static int count=0;
 static inline long perf_event_open(struct perf_event_attr *hw_event, pid_t pid, int cpu, int group_fd, unsigned long flags) {
     return syscall(__NR_perf_event_open, hw_event, pid, cpu, group_fd, flags);
 }
-static pid_t gettid() {
+
+/*static pid_t gettid() {
     return syscall(__NR_gettid);
-}
+}*/
 
 static inline void enable_watchpoint(int fd) {
     CHECK(ioctl(fd, PERF_EVENT_IOC_ENABLE, 0));
@@ -125,7 +126,7 @@ static inline int create_watchpoint(uintptr_t address, int type, int len) {
         // Deliver the signal to this thread
         struct f_owner_ex fown_ex;
         fown_ex.type = F_OWNER_TID;
-        fown_ex.pid  = gettid();
+        fown_ex.pid  = syscall(__NR_gettid); //gettid();
         int ret = fcntl(perf_fd, F_SETOWN_EX, &fown_ex);
         if (ret == -1){
             perror("fcntl");
